@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Tarefas</title>
+    <style>
+        /* CONFIGURAÇÕES GERAIS DA PÁGINA */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9; /* Fundo cinza claro */
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* O CARTÃO PRINCIPAL (Onde fica o conteúdo) */
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px; /* Bordas arredondadas */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Sombra suave */
+            width: 90%;
+            max-width: 800px;
+        }
+
+        /* CABEÇALHO */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            margin: 0;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .data-hoje {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* TABELA */
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Remove espaços entre bordas */
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            background-color: #007bff; /* Azul bonito */
+            color: white;
+            font-weight: 600;
+        }
+
+        th:first-child { border-radius: 5px 0 0 0; } /* Arredonda canto esquerdo */
+        th:last-child { border-radius: 0 5px 0 0; }  /* Arredonda canto direito */
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+
+        tr:last-child td { border-bottom: none; } /* Remove borda do último item */
+
+        /* ESTILOS DE STATUS (As cores e efeitos) */
+        
+        /* Tarefa Atrasada (Linha vermelha clara) */
+        .atrasada {
+            background-color: #fff0f0; 
+        }
+        .atrasada td {
+            color: #d9534f; /* Texto vermelho */
+        }
+        
+        /* Tarefa Concluída (Riscada e cinza) */
+        .concluida td {
+            text-decoration: line-through;
+            color: #aaa; /* Cinza claro */
+            background-color: #f9f9f9;
+        }
+
+        /* BADGES (Etiquetas de Status) */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .badge-atrasado { background-color: #ffebe6; color: #cc0000; }
+        .badge-feito { background-color: #e6fffa; color: #008060; }
+        .badge-dia { background-color: #e6f7ff; color: #007bff; }
+
+        /* CHECKBOX PERSONALIZADO */
+        input[type="checkbox"] {
+            transform: scale(1.2); /* Aumenta um pouco o checkbox */
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Minhas Tarefas</h1>
+            <span class="data-hoje">Hoje: {{ hoje|date:"d/m/Y" }}</span>
+        </header>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50px; text-align: center;">✔</th>
+                    <th>Descrição da Tarefa</th>
+                    <th style="width: 120px;">Data Limite</th>
+                    <th style="width: 100px;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tarefa in tarefas %}
+                <!-- 
+                    A LÓGICA DO DJANGO:
+                    Aqui verificamos se está atrasada ou concluída para aplicar a classe CSS correta na linha (<tr>).
+                -->
+                <tr class="{% if tarefa.data_conclusao < hoje and not tarefa.concluida %}atrasada{% elif tarefa.concluida %}concluida{% endif %}">
+                    
+                    <!-- Coluna do Checkbox -->
+                    <td style="text-align: center;">
+                        <input type="checkbox" {% if tarefa.concluida %}checked{% endif %} disabled>
+                    </td>
+
+                    <!-- Coluna do Título -->
+                    <td>
+                        <strong>{{ tarefa.titulo }}</strong>
+                    </td>
+                    
+                    <!-- Coluna da Data -->
+                    <td>{{ tarefa.data_conclusao|date:"d/m/Y" }}</td>
+
+                    <!-- Coluna da Etiqueta (Badge) -->
+                    <td>
+                        {% if tarefa.concluida %}
+                            <span class="badge badge-feito">Concluída</span>
+                        {% elif tarefa.data_conclusao < hoje %}
+                            <span class="badge badge-atrasado">Atrasada</span>
+                        {% else %}
+                            <span class="badge badge-dia">Em dia</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 20px; color: #888;">
+                        Nenhuma tarefa cadastrada.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
